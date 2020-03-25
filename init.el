@@ -49,6 +49,9 @@ There are two things you can do about this warning:
 
 (eval-when-compile
   (require 'use-package))
+;; Ensure all packages are installed globally
+(require 'use-package-ensure)
+(setq use-package-always-ensure t)
 
 (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
 
