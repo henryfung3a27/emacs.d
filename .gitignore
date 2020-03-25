@@ -1,0 +1,14 @@
+auto-save-list/
+backups/
+elpa/
+eshell/
+games/
+transient/
+url/
+
+.mc-lists.el
+
+recentf
+tramp
+
+*.old
