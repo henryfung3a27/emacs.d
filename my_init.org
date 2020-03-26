@@ -1,0 +1,296 @@
+* Emacs Global
+** custom-set-faces
+#+BEGIN_SRC emacs-lisp
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+#+END_SRC
+
+** Package configuration
+#+BEGIN_SRC emacs-lisp
+  (require 'package)
+  (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
+                      (not (gnutls-available-p))))
+         (proto (if no-ssl "http" "https")))
+    (when no-ssl
+      (warn "\
+  Your version of Emacs does not support SSL connections,
+  which is unsafe because it allows man-in-the-middle attacks.
+  There are two things you can do about this warning:
+  1. Install an Emacs version that does support SSL and be safe.
+  2. Remove this warning from your init file so you won't see it again."))
+    ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+    (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+    ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+    (when (< emacs-major-version 24)
+      ;; For important compatibility libraries like cl-lib
+      (add-to-list 'package-archives (cons "gnu" (concat proto "://elpa.gnu.org/packages/")))))
+
+  (package-initialize)
+#+END_SRC
+
+** load-path
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path (expand-file-name "elisp" user-emacs-directory))
+#+END_SRC
+
+** use-package
+#+BEGIN_SRC emacs-lisp
+  (eval-when-compile
+    (require 'use-package))
+  ;; Ensure all packages are installed globally
+  (require 'use-package-ensure)
+  (setq use-package-always-ensure t)
+#+END_SRC
+
+* Editor Preference
+** Scroll one line at a time (less "jumpy" than defaults)
+#+BEGIN_SRC emacs-lisp
+  (setq mouse-wheel-scroll-amount '(1 ((shift) . 1))) ;; one line at a time
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+  (setq scroll-step 1) ;; keyboard scroll one line at a time
+#+END_SRC
+
+** Scroll window up/down by one line
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-<down>") (kbd "C-u 1 C-v"))
+  (global-set-key (kbd "C-<up>") (kbd "C-u 1 M-v"))
+#+END_SRC
+
+** Set tab properties
+#+BEGIN_SRC emacs-lisp
+  (setq-default tab-width 4)           ;; tab-width = 4 
+  (setq-default indent-tabs-mode nil)  ;; tab to space
+#+END_SRC
+
+** Set backup directory
+#+BEGIN_SRC emacs-lisp
+  (setq backup-directory-alist
+        `(("." . ,(concat user-emacs-directory "backups"))))
+#+END_SRC
+
+** Set home key to begginning of indentation or line
+#+BEGIN_SRC emacs-lisp
+  (defun back-to-indentation-or-beginning () (interactive)
+    (if (= (point) (progn (back-to-indentation) (point)))
+        (beginning-of-line)))
+  (global-set-key (kbd "<home>") 'back-to-indentation-or-beginning)
+#+END_SRC
+
+** Set ring bell to flash mode line instead
+#+BEGIN_SRC emacs-lisp
+  (defun my-terminal-visible-bell ()
+    "A friendlier visual bell effect."
+    (invert-face 'mode-line)
+    (run-with-timer 0.1 nil 'invert-face 'mode-line)) 
+  (setq visible-bell nil
+        ring-bell-function 'my-terminal-visible-bell)
+#+END_SRC
+
+** Go to previous window (inverse of goto other window with "C-x o")
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x O") (lambda ()
+                                  (interactive)
+                                  (other-window -1)))
+#+END_SRC
+
+** Go to "arrow pointed" window by "c-x C-<arrow>"
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-x <C-left>") 'windmove-left)
+  (global-set-key (kbd "C-x <C-right>") 'windmove-right)
+  (global-set-key (kbd "C-x <C-up>") 'windmove-up)
+  (global-set-key (kbd "C-x <C-down>") 'windmove-down)
+#+END_SRC
+
+** Turn "auto-revert-mode" on by default for git checkout and bind to f5
+#+BEGIN_SRC emacs-lisp
+  (global-auto-revert-mode t)
+
+  (global-set-key
+   (kbd "<f5>")
+   (lambda (&optional force-reverting)
+     "Interactive call to revert-buffer. Ignoring the auto-save
+   file and not requesting for confirmation. When the current buffer
+   is modified, the command refuses to revert it, unless you specify
+   the optional argument: force-reverting to true."
+     (interactive "P")
+     ;;(message "force-reverting value is %s" force-reverting)
+     (if (or force-reverting (not (buffer-modified-p)))
+         (revert-buffer :ignore-auto :noconfirm)
+       (error "The buffer has been modified"))))
+#+END_SRC
+
+** Show line number
+#+BEGIN_SRC emacs-lisp
+  (global-display-line-numbers-mode t)
+#+END_SRC
+
+** Answer y/n instead of yes/no
+#+BEGIN_SRC emacs-lisp
+  (defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** Go up/down 5 lines at a time by M-<up> and M-<down>
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "M-<up>") (kbd "C-u 5 C-p"))
+  (global-set-key (kbd "M-<down>") (kbd "C-u 5 C-n"))
+#+END_SRC
+
+** Go up/down 5 lines with window
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-M-<up>") (kbd "C-u 5 C-<up>"))
+  (global-set-key (kbd "C-M-<down>") (kbd "C-u 5 C-<down>"))
+#+END_SRC
+
+** Uniquify buffer name
+#+BEGIN_SRC emacs-lisp
+  (setq uniquify-buffer-name-style 'forward)
+#+END_SRC
+
+** Show matching parenthesis (expression)
+#+BEGIN_SRC emacs-lisp
+  (show-paren-mode t)
+  (setq show-paren-style 'expression)
+#+END_SRC
+
+* Package
+** helm
+#+BEGIN_SRC emacs-lisp
+  (use-package helm
+    :bind (("C-x C-f" . helm-find-files)
+           ("C-x b" . helm-mini)
+           ("C-s" . helm-swoop)
+           ("M-x" . helm-M-x))
+    :config (progn
+              (setq helm-buffers-fuzzy-matching t)
+              (helm-mode 1)))
+#+END_SRC
+
+** moe-theme
+#+BEGIN_SRC emacs-lisp
+  (use-package moe-theme
+    :config
+    (setq moe-theme-highlight-buffer-id t)
+    (moe-dark))
+#+END_SRC
+
+** magit
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind (("C-c C-g" . magit-status)))
+#+END_SRC
+
+* Mode
+** web-mode
+#+BEGIN_SRC emacs-lisp
+  (use-package web-mode
+    :mode ("\\.phtml\\'"
+           "\\.tpl\\.php\\'"
+           "\\.[agj]sp\\'"
+           "\\.as[cp]x\\'"
+           "\\.erb\\'"
+           "\\.mustache\\'"
+           "\\.djhtml\\'")
+    :config
+    (setq
+     web-mode-markup-indent-offset 2
+     web-mode-css-indent-offset 2
+     web-mode-code-indent-offset 2
+     web-mode-enable-auto-closing t
+     web-mode-enable-auto-opening t
+     web-mode-enable-auto-pairing t
+     web-mode-enable-auto-indentation t))
+#+END_SRC
+
+** ocaml tuareg & merlin
+#+BEGIN_SRC emacs-lisp
+  (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var"
+     "share")))))
+        (when (and opam-share (file-directory-p opam-share))
+         ;; Register Merlin
+         (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+         (autoload 'merlin-mode "merlin" nil t nil)
+         ;; Automatically start it in OCaml buffers
+         (add-hook 'tuareg-mode-hook 'merlin-mode t)
+         (add-hook 'caml-mode-hook 'merlin-mode t)
+         ;; Use opam switch to lookup ocamlmerlin binary
+         (setq merlin-command 'opam)))
+  ;; ## added by OPAM user-setup for emacs / base ## 56ab50dc8996d2bb95e7856a6eddb17b ## you can edit, but keep this line
+  (require 'opam-user-setup "~/.emacs.d/elisp/opam-user-setup.el")
+  ;; ## end of OPAM user-setup addition for emacs / base ## keep this line
+#+END_SRC
+
+** multiple cursor
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :bind
+    (("C-S-c C-S-c" . mc/edit-lines)
+     ("C->" . mc/mark-next-like-this)
+     ("C-<" . mc/mark-previous-like-this)
+     ("M-<mouse-1>" . mc/add-cursor-on-click))
+    :init
+    (global-unset-key (kbd "M-<down-mouse-1>"))
+    :config
+     ;; <return> now insert newline instead of quit mc mode
+    (define-key mc/keymap (kbd "<return>") nil))
+#+END_SRC
+
+** fish-mode
+#+BEGIN_SRC emacs-lisp
+  ;; indentation size in CUSTOM section, at the beginning of this file (~/.emacs)
+#+END_SRC
+
+* Language Specific
+** C/C++
+*** Switch case indentation
+#+BEGIN_SRC emacs-lisp
+  ;;   - '+ means indent one more
+  ;;   - '- means indent one less
+  ;;   - 0 means no indent at all
+  (c-set-offset 'case-label '+)
+#+END_SRC
+
+*** Indentation style
+#+BEGIN_SRC emacs-lisp
+  ;; - gnu (default)
+  ;; - linux
+  (setq c-default-style "linux"
+        c-basic-offset 4)
+#+END_SRC
+
+** Python
+*** Insert a python comment block (light)
+#+BEGIN_SRC emacs-lisp
+  ;; # +---------------------------------------+
+  ;; # | insert a python comment block (light) |
+  ;; # +---------------------------------------+
+  (defun python-block-light (name)
+    "Insert a light python comment block"
+    (interactive "sBlock name: ")
+    (let ((len (+ 2 (length name))))
+      (insert "# +" (make-string len ?-) "+")
+      (insert "\n")
+      (insert "# | " name " |")
+      (insert "\n")
+      (insert "# +" (make-string len ?-) "+")))
+#+END_SRC
+
+*** Insert a python comment block (heavy)
+#+BEGIN_SRC emacs-lisp
+  ;; ###########################################
+  ;; #  insert a python comment block (heavy)  #
+  ;; ###########################################
+  (defun python-block-heavy (name)
+    "Insert a heavy python comment block"
+    (interactive "sBlock name: ")
+    (let ((len (+ 6 (length name))))
+      (insert (make-string len ?#))
+      (insert "\n")
+      (insert "#  " (upcase name) "  #")
+      (insert "\n")
+      (insert (make-string len ?#))))
+#+END_SRC
