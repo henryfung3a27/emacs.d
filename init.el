@@ -8,13 +8,13 @@
  '(custom-enabled-themes (quote (moe-dark)))
  '(custom-safe-themes
    (quote
-    ("ae65ccecdcc9eb29ec29172e1bfb6cadbe68108e1c0334f3ae52414097c501d2" default)))
+    ("a27c00821ccfd5a78b01e4f35dc056706dd9ede09a8b90c6955ae6a390eb1c1e" "ae65ccecdcc9eb29ec29172e1bfb6cadbe68108e1c0334f3ae52414097c501d2" default)))
  '(fish-indent-offset 2)
  '(inhibit-startup-screen t)
  '(ivy-mode t)
  '(package-selected-packages
    (quote
-    (opam-user-setup use-package esup moe-theme neotree helm-swoop fish-mode helm magit multiple-cursors markdown-preview-mode markdown-mode+ flymd markdown-mode web-mode php-mode))))
+    (smart-mode-line opam-user-setup use-package esup moe-theme neotree helm-swoop fish-mode helm magit multiple-cursors markdown-preview-mode markdown-mode+ flymd markdown-mode web-mode php-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
