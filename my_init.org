@@ -1,12 +1,11 @@
+#+STARTUP: indent
+
 * Emacs Global
-** custom-set-faces
+** custom-file
 #+BEGIN_SRC emacs-lisp
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   )
+  (setq custom-file "~/.emacs.d/custom.el")
+  (if (file-exists-p custom-file)
+      (load custom-file))
 #+END_SRC
 
 ** Package configuration
@@ -61,12 +60,11 @@
   (global-set-key (kbd "C-<up>") (kbd "C-u 1 M-v"))
 #+END_SRC
 
-** Set tab properties
 #+BEGIN_SRC emacs-lisp
+** Set tab properties
   (setq-default tab-width 4)           ;; tab-width = 4 
   (setq-default indent-tabs-mode nil)  ;; tab to space
 #+END_SRC
-
 ** Set backup directory
 #+BEGIN_SRC emacs-lisp
   (setq backup-directory-alist
@@ -94,21 +92,22 @@
 ** Go to previous window (inverse of goto other window with "C-x o")
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-x O") (lambda ()
+
                                   (interactive)
                                   (other-window -1)))
 #+END_SRC
-
 ** Go to "arrow pointed" window by "c-x C-<arrow>"
 #+BEGIN_SRC emacs-lisp
   (global-set-key (kbd "C-x <C-left>") 'windmove-left)
+
   (global-set-key (kbd "C-x <C-right>") 'windmove-right)
   (global-set-key (kbd "C-x <C-up>") 'windmove-up)
   (global-set-key (kbd "C-x <C-down>") 'windmove-down)
 #+END_SRC
-
 ** Turn "auto-revert-mode" on by default for git checkout and bind to f5
 #+BEGIN_SRC emacs-lisp
   (global-auto-revert-mode t)
+
 
   (global-set-key
    (kbd "<f5>")
@@ -123,14 +122,14 @@
          (revert-buffer :ignore-auto :noconfirm)
        (error "The buffer has been modified"))))
 #+END_SRC
-
 ** Show line number and column number
 #+BEGIN_SRC emacs-lisp
   (global-display-line-numbers-mode t)
+
   (column-number-mode)
 #+END_SRC
-
 ** Answer y/n instead of yes/no
+
 #+BEGIN_SRC emacs-lisp
   (defalias 'yes-or-no-p 'y-or-n-p)
 #+END_SRC
@@ -244,11 +243,24 @@
     (define-key mc/keymap (kbd "<return>") nil))
 #+END_SRC
 
-** fish-mode
+** org-mode
+*** Enable code evaluation for several languages.
+Ref: https://orgmode.org/manual/Languages.html
 #+BEGIN_SRC emacs-lisp
-  ;; indentation size in CUSTOM section, at the beginning of this file (~/.emacs)
+  (org-babel-do-load-languages
+  'org-babel-load-languages
+  '((emacs-lisp . t)
+  (C . t)
+  (java . t)
+  (python . t)
+  (ocaml . t)))
 #+END_SRC
 
+*** Do NOT prompt when executing code block
+#+BEGIN_SRC emacs-lisp
+  (setq org-confirm-babel-evaluate nil)
+#+END_SRC
+   
 * Language Specific
 ** C/C++
 *** Switch case indentation
